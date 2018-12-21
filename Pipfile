@@ -4,10 +4,14 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
+ipdb = "*"
+pep8 = "*"
+pylint = "==2.2.2"
 
 [packages]
 requests = "==2.18.4"
 beautifulsoup4 = "==4.6.0"
+pymongo = "==3.7.2"
 
 [requires]
 python_version = "3.6"
