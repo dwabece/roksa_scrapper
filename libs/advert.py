@@ -79,9 +79,9 @@ def _parse_ad(page_body):
     for field_fnc in fields_to_parse:
         try:
             result.update(field_fnc(soup))
-        except AttributeError as exc:
-            import ipdb; ipdb.set_trace()
-            print(type(exc), exc)
+        except AttributeError:
+            # TODO logging nand dumping HTML needed here
+            pass
 
     return result
 
