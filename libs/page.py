@@ -59,7 +59,7 @@ def _call_rox_advert(rid):
 
 
 def fetch_advert_data(roksa_id, return_as_json=False):
-    response_code, www_body = _call_rox_advert(roksa_id)
+    _, www_body = _call_rox_advert(roksa_id)
 
     page_data = advert.parse_ad(www_body)
     if return_as_json:
