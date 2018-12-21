@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import sys
-from libs import page
+from libs.advert import fetch_advert
 
 
 def run():
@@ -9,7 +9,7 @@ def run():
     except IndexError:
         rid = 602586  # ;)
 
-    print(page.fetch_advert_data(rid))
+    print(fetch_advert(rid, True))
 
 
 if __name__ == '__main__':

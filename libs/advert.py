@@ -2,10 +2,65 @@
 Logic responsible for parsing and extracting vital data
 from ad's HTML body
 """
+import json
+import config
 from bs4 import BeautifulSoup
+from pymongo import MongoClient
+from libs.page import call_rox_advert
+
+# Mongo initialization
+MONGO_CLIENT = MongoClient(config.get_mongo_url())
+DB = MONGO_CLIENT.get_database(config.MONGO.get('db'))
+ADVERT_COL = DB.get_collection('advert')
 
 
-def parse_ad(page_body):
+def fetch_advert(roksa_id, persist=False, return_as_json=False):
+    """
+    Parameters:
+        roksa_id (int): advert id from portal
+        persist (bool): tells wether save result into mongo or not
+        return_as_json (bool): tells wether return JSON serialized object
+            or python dictionary
+
+    Returns:
+        dict|string: advert parameters, as dict or JSON serialized,
+            depends on `return_as_json` argument
+    """
+    _, www_body = call_rox_advert(roksa_id)
+
+    page_data = _parse_ad(www_body)
+
+    if persist:
+        persist_advert(page_data)
+
+    if return_as_json:
+        return json.dumps(page_data)
+
+    return page_data
+
+
+def persist_advert(advert_data, check_if_exists=True):
+    """
+    Saves fetched advert data to mongo collection
+
+    Parameters:
+        advert_data (dict): dict containing set of found ad attributes
+        check_if_exists (bool): verify if such ad already exists
+            before inserting it
+
+    Returns:
+        object: pymongo element object
+    """
+    if check_if_exists:
+        existing = ADVERT_COL.find_one({'id': advert_data['id']})
+        if existing:
+            return existing.get('_id')
+    res = ADVERT_COL.insert(advert_data)
+
+    return res
+
+
+def _parse_ad(page_body):
     """
     Loads page source, parses it then extracts and returns advert attributes.
 
@@ -24,7 +79,8 @@ def parse_ad(page_body):
     for field_fnc in fields_to_parse:
         try:
             result.update(field_fnc(soup))
-        except Exception as exc:
+        except AttributeError as exc:
+            import ipdb; ipdb.set_trace()
             print(type(exc), exc)
 
     return result
@@ -94,14 +150,12 @@ def _get_commonfields(soup_body):
     ad_attributes_list = soup_body.find('div', attrs={'id': 'anons_details'})\
         .find('ul').find_all('li')
 
-    desired_fields = {
-        'phone number': None,
-        'city': None,
-        'district': None,
-        'age': None,
+    desired_fields = ('phone number', 'city', 'district', 'age', 'weight',
+                      'height', 'breast', 'languages', '1 hour')
+
+    fields_values_mapping = {
         'weight': _parse_commonfields_numeric,
         'height': _parse_commonfields_numeric,
-        'breast': None,
         'languages': _parse_commonfields_list,
         '1 hour': _parse_commonfields_numeric,
     }
@@ -109,13 +163,19 @@ def _get_commonfields(soup_body):
     for item in ad_attributes_list:
         obj_attr_label = item.find('span')
         obj_attr_value = obj_attr_label.find_next_sibling()
+
         attr_name = sanitize_attribute_key(obj_attr_label.get_text(strip=True))
 
-        if attr_name in desired_fields and obj_attr_value:
-            attr_value_text = obj_attr_value.get_text(strip=True)
-            value_parse_fn = desired_fields[attr_name]
+        if attr_name not in desired_fields or not obj_attr_value:
+            continue
 
-            result[attr_name] = value_parse_fn(attr_value_text) if value_parse_fn else attr_value_text
+        attr_value = obj_attr_value.get_text(strip=True)
+
+        value_map_fn = fields_values_mapping.get(attr_name)
+        if value_map_fn:
+            attr_value = value_map_fn(attr_value)
+
+        result[attr_name] = attr_value
 
     return result
 

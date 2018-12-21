@@ -2,9 +2,8 @@
 Logic responsible for fetching ad data from website
 """
 
-import json
 import requests
-from libs import advert, user_agents
+from libs import user_agents
 from logmodule import get_logger
 
 logger = get_logger(__name__)
@@ -40,7 +39,7 @@ def _execute_rox_request(rid):
     return requests.get(advert_url, **request_params)
 
 
-def _call_rox_advert(rid):
+def call_rox_advert(rid):
     """
     Fetching advert page from portal.
     Verifying if response was really 200 or it was just empty page
@@ -56,13 +55,3 @@ def _call_rox_advert(rid):
         raise requests.exceptions.HTTPError('ad disabled / not found')
 
     return http_response_code, page_body
-
-
-def fetch_advert_data(roksa_id, return_as_json=False):
-    _, www_body = _call_rox_advert(roksa_id)
-
-    page_data = advert.parse_ad(www_body)
-    if return_as_json:
-        return json.dumps(page_data)
-
-    return page_data
