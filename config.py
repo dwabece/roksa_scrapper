@@ -1,3 +1,10 @@
+HOST = 'localhost'
+
+RABBIT_HOST = HOST
+RABBIT_USER = 'guest'
+RABBIT_PASSWORD = 'guest'
+RABBIT_URL = f'amqp://{RABBIT_USER}:{RABBIT_PASSWORD}@{RABBIT_HOST}:5672/'
+
 MONGO = {
     'host': 'localhost',
     'port': '27017',
