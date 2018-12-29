@@ -7,11 +7,15 @@ import config
 from bs4 import BeautifulSoup
 from pymongo import MongoClient
 from libs.page import call_rox_advert
+from logmodule import get_logger
 
 # Mongo initialization
 MONGO_CLIENT = MongoClient(config.get_mongo_url())
 DB = MONGO_CLIENT.get_database(config.MONGO.get('db'))
 ADVERT_COL = DB.get_collection('advert')
+
+
+logger = get_logger(__name__)
 
 
 def fetch_advert(roksa_id, persist=False, return_as_json=False):
@@ -26,12 +30,13 @@ def fetch_advert(roksa_id, persist=False, return_as_json=False):
         dict|string: advert parameters, as dict or JSON serialized,
             depends on `return_as_json` argument
     """
+    # @TODO tryexcept that
     _, www_body = call_rox_advert(roksa_id)
 
     page_data = _parse_ad(www_body)
 
     if persist:
-        persist_advert(page_data)
+        _persist_advert(page_data)
 
     if return_as_json:
         return json.dumps(page_data)
@@ -39,7 +44,7 @@ def fetch_advert(roksa_id, persist=False, return_as_json=False):
     return page_data
 
 
-def persist_advert(advert_data, check_if_exists=True):
+def _persist_advert(advert_data, check_if_exists=True):
     """
     Saves fetched advert data to mongo collection
 
@@ -79,9 +84,13 @@ def _parse_ad(page_body):
     for field_fnc in fields_to_parse:
         try:
             result.update(field_fnc(soup))
-        except AttributeError:
+        except AttributeError as exc:
+            logger.debug(exc)
+            raise
             # TODO logging nand dumping HTML needed here
-            pass
+            # we're passing that since number is our priority
+            # not consistence
+            # pass
 
     return result
 
