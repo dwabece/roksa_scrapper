@@ -3,7 +3,6 @@ Logic responsible for fetching ad data from website
 """
 
 import requests
-from libs import user_agents
 from logmodule import get_logger
 
 logger = get_logger(__name__)
@@ -29,7 +28,6 @@ def _execute_rox_request(rid):
     advert_url = _get_advert_url(rid)
 
     headers_payload = {
-        'User-Agent': user_agents.get_random_useragent(),
         'Referer': 'https://www.roksa.pl/',
     }
     request_params = {
@@ -52,6 +50,6 @@ def call_rox_advert(rid):
     page_body = response.content.decode('utf-8')
 
     if not _is_response_really_200(page_body):
-        raise requests.exceptions.HTTPError('ad disabled / not found')
+        raise requests.exceptions.HTTPError(f'ad {rid} disabled or deleted')
 
     return http_response_code, page_body
