@@ -6,7 +6,7 @@ import json
 import config
 from bs4 import BeautifulSoup
 from pymongo import MongoClient
-from libs.page import call_rox_advert
+from libs.page import get_advert_page
 from logmodule import get_logger
 
 # Mongo initialization
@@ -31,7 +31,7 @@ def fetch_advert(roksa_id, persist=False, return_as_json=False):
             depends on `return_as_json` argument
     """
     # @TODO tryexcept that
-    _, www_body = call_rox_advert(roksa_id)
+    _, www_body = get_advert_page(roksa_id)
 
     page_data = _parse_ad(www_body)
 

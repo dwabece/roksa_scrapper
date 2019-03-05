@@ -37,7 +37,7 @@ def _execute_rox_request(rid):
     return requests.get(advert_url, **request_params)
 
 
-def call_rox_advert(rid):
+def get_advert_page(rid):
     """
     Fetching advert page from portal.
     Verifying if response was really 200 or it was just empty page
@@ -53,3 +53,9 @@ def call_rox_advert(rid):
         raise requests.exceptions.HTTPError(f'ad {rid} disabled or deleted')
 
     return http_response_code, page_body
+
+
+def get_search_page_results(page_num=None):
+    base_url = 'https://www.roksa.pl/pl/szukaj/?anons_type=0&cenaod=1'
+    if page_num:
+        base_url += f'&pageNr={page_num}'
