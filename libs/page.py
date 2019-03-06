@@ -1,8 +1,9 @@
 """
 Logic responsible for fetching ad data from website
 """
-
+import re
 import requests
+from bs4 import BeautifulSoup
 from logmodule import get_logger
 
 logger = get_logger(__name__)
@@ -21,20 +22,28 @@ def _is_response_really_200(www_body):
     return True if probe_phrase not in www_body else False
 
 
-def _execute_rox_request(rid):
+def _execute_rox_request(advert_url):
     """
     Executes parametrized request to portal
     """
-    advert_url = _get_advert_url(rid)
-
     headers_payload = {
         'Referer': 'https://www.roksa.pl/',
     }
     request_params = {
         'headers': headers_payload,
-        'timeout': 0.5,
+        'timeout': 1.5,
     }
     return requests.get(advert_url, **request_params)
+
+
+def get_rox_page(url):
+    response = _execute_rox_request(url)
+    response.raise_for_status()
+
+    http_response_code = response.status_code
+    page_body = response.content.decode('utf-8')
+
+    return http_response_code, page_body
 
 
 def get_advert_page(rid):
@@ -43,11 +52,8 @@ def get_advert_page(rid):
     Verifying if response was really 200 or it was just empty page
     with no data returning http 200 status.
     """
-    response = _execute_rox_request(rid)
-    response.raise_for_status()
-
-    http_response_code = response.status_code
-    page_body = response.content.decode('utf-8')
+    advert_url = _get_advert_url(rid)
+    http_response_code, page_body = get_rox_page(advert_url)
 
     if not _is_response_really_200(page_body):
         raise requests.exceptions.HTTPError(f'ad {rid} disabled or deleted')
@@ -55,7 +61,24 @@ def get_advert_page(rid):
     return http_response_code, page_body
 
 
-def get_search_page_results(page_num=None):
+def get_sresults_page(page_num=None):
     base_url = 'https://www.roksa.pl/pl/szukaj/?anons_type=0&cenaod=1'
     if page_num:
         base_url += f'&pageNr={page_num}'
+
+    _, page_body = get_rox_page(base_url)
+    return page_body
+
+
+def get_sresults_pages_info(page_body):
+    soup = BeautifulSoup(page_body, 'html.parser')
+    pagination_container = soup.find_all('div', class_='stronnicowanie')
+
+    if not pagination_container:
+        raise Exception('no pagination found!')
+
+    pagination_str = pagination_container[0].text
+    pages = re.findall(r'\d+', pagination_str)
+    pages[0] += 1
+
+    return pages

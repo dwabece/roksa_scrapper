@@ -201,3 +201,7 @@ def _parse_commonfields_list(txt_val):
     Helper function that splits coma separated elements to list
     """
     return [item.strip() for item in txt_val.split(',') if item]
+
+
+def extract_advert_ids_from_search_result_page(page_body):
+    return []
