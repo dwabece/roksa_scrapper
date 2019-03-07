@@ -204,4 +204,8 @@ def _parse_commonfields_list(txt_val):
 
 
 def extract_advert_ids_from_search_result_page(page_body):
-    return []
+    body_container = BeautifulSoup(page_body, 'html.parser')
+    adverts_container = body_container.find(id='anons_group')
+    ads = adverts_container.find('a')
+
+    return [int(a['href'].split('/')[-1]) for a in ads]

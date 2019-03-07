@@ -22,11 +22,10 @@ def put_ids_to_queue(ids_list):
 @app.task(rate_limit='28/m', bind=True, default_retry_delay=60 * 60)
 def fetch_single_advert(self, rid):
     """
-    Task that fetches advert
+    Fetching single advert
     """
     try:
-        logger.info(f'fetching: {rid}')
-        result = advert.fetch_advert(rid, persist=True)
+        advert.fetch_advert(rid, persist=True)
     except requests.exceptions.HTTPError as e:
         crawler_banned = e.response.status_code == 403
         if crawler_banned:
@@ -34,24 +33,27 @@ def fetch_single_advert(self, rid):
             self.retry()
         logger.error(e)
     except AttributeError:
-        logger.error(f'Body parse error on {rid}')
-    except Exception as e:
-        logger.error(e)
-        pass
+        logger.error('Body parse error on %s', rid)
 
 
-@app.task(rate_limit='28/m')
-def iterate_over_search_results(self, page_num=1, default_retry_delay=60 * 60):
+@app.task(rate_limit='28/m', default_retry_delay=60 * 60)
+def iterate_over_search_results(page_num=1):
+    """
+    Going through pagination results
+    """
+    logger.info('fetching page %s', page_num)
     try:
         page_body = page.get_sresults_page(page_num)
     except requests.exceptions.HTTPError as e:
         if e.response.status_code == 403:
-            self.retry()
+            # self.retry()
+            return
 
     search_result_adverts = advert.extract_advert_ids_from_search_result_page(page_body)
     put_ids_to_queue(search_result_adverts)
 
     next_page, pages_count = page.get_sresults_pages_info(page_body)
+    print(next_page, pages_count)
     if next_page > pages_count:
         return
 

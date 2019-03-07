@@ -62,6 +62,9 @@ def get_advert_page(rid):
 
 
 def get_sresults_page(page_num=None):
+    """
+    Fetching search results page by its number
+    """
     base_url = 'https://www.roksa.pl/pl/szukaj/?anons_type=0&cenaod=1'
     if page_num:
         base_url += f'&pageNr={page_num}'
@@ -71,6 +74,10 @@ def get_sresults_page(page_num=None):
 
 
 def get_sresults_pages_info(page_body):
+    """
+    Get pagination info (next page and last page number)
+    from passed search results page
+    """
     soup = BeautifulSoup(page_body, 'html.parser')
     pagination_container = soup.find_all('div', class_='stronnicowanie')
 
@@ -79,6 +86,8 @@ def get_sresults_pages_info(page_body):
 
     pagination_str = pagination_container[0].text
     pages = re.findall(r'\d+', pagination_str)
+
+    pages = [int(p) for p in pages]
     pages[0] += 1
 
     return pages
