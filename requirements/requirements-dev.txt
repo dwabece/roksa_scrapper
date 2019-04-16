@@ -1,5 +1,7 @@
 -r requirements.txt
 
+
+black
 ipdb
 pep8
 pylint

@@ -6,7 +6,7 @@ import requests
 from bs4 import BeautifulSoup
 from logmodule import get_logger
 
-logger = get_logger(__name__)
+LOGGER = get_logger(__name__)
 
 
 def _get_advert_url(rox_id):
@@ -26,13 +26,8 @@ def _execute_rox_request(advert_url):
     """
     Executes parametrized request to portal
     """
-    headers_payload = {
-        'Referer': 'https://www.roksa.pl/',
-    }
-    request_params = {
-        'headers': headers_payload,
-        'timeout': 1.5,
-    }
+    headers_payload = {'Referer': 'https://www.roksa.pl/'}
+    request_params = {'headers': headers_payload, 'timeout': 1.5}
     return requests.get(advert_url, **request_params)
 
 
