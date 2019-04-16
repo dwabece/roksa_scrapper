@@ -1,0 +1,29 @@
+[MASTER]
+load-plugins = pylint.extensions.mccabe
+ignore-patterns = \d{4}.*.py
+good-names = f
+disable=C0330,E203,W0406
+extension-pkg-whitelist=lxml
+
+[REPORTS]
+output-format = colorized
+
+[DESIGN]
+min-public-methods = 0
+max-parents = 15
+max-attributes = 50
+
+[BASIC]
+docstring-min-length = 5
+include-naming-hint = yes
+
+[SIMILARITIES]
+ignore-imports = yes
+min-similarity-lines = 12
+
+[VARIABLES]
+init-import = yes
+ignored-argument-names = _.*|^ignored_|^unused_|kwargs
+
+[FORMAT]
+max-line-length=120
