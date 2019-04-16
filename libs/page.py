@@ -6,7 +6,7 @@ import requests
 from bs4 import BeautifulSoup
 from logmodule import get_logger
 
-logger = get_logger(__name__)
+LOGGER = get_logger(__name__)
 
 
 def _get_advert_url(rox_id):
