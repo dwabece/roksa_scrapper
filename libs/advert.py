@@ -3,9 +3,11 @@ Logic responsible for parsing and extracting vital data
 from ad's HTML body
 """
 import json
-import config
+
 from bs4 import BeautifulSoup
 from pymongo import MongoClient
+
+import config
 from libs.page import get_advert_page
 from logmodule import get_logger
 

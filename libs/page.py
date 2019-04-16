@@ -2,8 +2,10 @@
 Logic responsible for fetching ad data from website
 """
 import re
+
 import requests
 from bs4 import BeautifulSoup
+
 from logmodule import get_logger
 
 LOGGER = get_logger(__name__)

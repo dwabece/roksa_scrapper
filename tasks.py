@@ -1,11 +1,12 @@
 """
 Scrapper celery tasks
 """
-from celery import Celery
 import requests
+from celery import Celery
+
 import config
-from logmodule import get_logger
 from libs import advert, page
+from logmodule import get_logger
 
 LOGGER = get_logger(__name__)
 
