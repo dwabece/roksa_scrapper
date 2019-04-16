@@ -7,10 +7,7 @@ from libs import advert, page
 
 logger = get_logger(__name__)
 
-app = Celery(
-    'tasks',
-    broker=config.RABBIT_URL
-)
+app = Celery('tasks', broker=config.RABBIT_URL)
 
 
 def put_ids_to_queue(ids_list):

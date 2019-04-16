@@ -26,13 +26,8 @@ def _execute_rox_request(advert_url):
     """
     Executes parametrized request to portal
     """
-    headers_payload = {
-        'Referer': 'https://www.roksa.pl/',
-    }
-    request_params = {
-        'headers': headers_payload,
-        'timeout': 1.5,
-    }
+    headers_payload = {'Referer': 'https://www.roksa.pl/'}
+    request_params = {'headers': headers_payload, 'timeout': 1.5}
     return requests.get(advert_url, **request_params)
 
 

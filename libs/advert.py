@@ -75,8 +75,13 @@ def _parse_ad(page_body):
     Returns:
         dict: advert attributes with their values
     """
-    fields_to_parse = (_get_ad_name, _get_ad_id, _get_services,
-                       _get_ad_description, _get_commonfields)
+    fields_to_parse = (
+        _get_ad_name,
+        _get_ad_id,
+        _get_services,
+        _get_ad_description,
+        _get_commonfields,
+    )
 
     soup = BeautifulSoup(page_body, 'html.parser')
     result = {}
@@ -103,7 +108,11 @@ def _get_ad_id(soup_body):
         dict: dict containing `id` key and list of services
             passed as a python list
     """
-    value = soup_body.find('head').find('link', {'rel': 'canonical'}, href=True).get('href', 'Not found')
+    value = (
+        soup_body.find('head')
+        .find('link', {'rel': 'canonical'}, href=True)
+        .get('href', 'Not found')
+    )
     return {'id': value.split('/')[-1]}
 
 
@@ -114,7 +123,12 @@ def _get_ad_name(soup_body):
         Returns:
         dict: dict containing `name` key and list of services
     """
-    value = soup_body.find('div', attrs={'id': 'anons_header'}).find('h2').get_text().strip()
+    value = (
+        soup_body.find('div', attrs={'id': 'anons_header'})
+        .find('h2')
+        .get_text()
+        .strip()
+    )
     return {'name': value}
 
 
@@ -125,8 +139,9 @@ def _get_ad_description(soup_body):
         Returns:
         dict: dict containing `description` key and description text
     """
-    desc_container = soup_body.find('div', attrs={'id': 'anons_content'})\
-        .find('div', attrs={'id': 'tresc_pl'})
+    desc_container = soup_body.find('div', attrs={'id': 'anons_content'}).find(
+        'div', attrs={'id': 'tresc_pl'}
+    )
     return {'description': desc_container.get_text(strip=True)}
 
 
@@ -156,11 +171,21 @@ def _get_commonfields(soup_body):
     def sanitize_attribute_key(txt_val):
         return txt_val.lower().split(':')[0]
 
-    ad_attributes_list = soup_body.find('div', attrs={'id': 'anons_details'})\
-        .find('ul').find_all('li')
+    ad_attributes_list = (
+        soup_body.find('div', attrs={'id': 'anons_details'}).find('ul').find_all('li')
+    )
 
-    desired_fields = ('phone number', 'city', 'district', 'age', 'weight',
-                      'height', 'breast', 'languages', '1 hour')
+    desired_fields = (
+        'phone number',
+        'city',
+        'district',
+        'age',
+        'weight',
+        'height',
+        'breast',
+        'languages',
+        '1 hour',
+    )
 
     fields_values_mapping = {
         'weight': _parse_commonfields_numeric,

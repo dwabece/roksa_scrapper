@@ -1,7 +1,9 @@
 import logging
 import sys
 
-LOG_ENTRY_FORMAT = logging.Formatter('%(asctime)s: %(name)s [%(levelname)s] — %(message)s')
+LOG_ENTRY_FORMAT = logging.Formatter(
+    '%(asctime)s: %(name)s [%(levelname)s] — %(message)s'
+)
 LOG_FILENAME = 'rox.log'
 LOGGING_LEVEL = logging.DEBUG
 
