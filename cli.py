@@ -20,13 +20,14 @@ def cli():
 
 @cli.command()
 @click.argument('rid')
-@click.argument('persist')
+@click.argument('persist_data', default=False)
 def fetch(rid, persist_data):
     """
     Fetching and displaying ad by its id.
 
     Attributes:
         rid (rid): Advert id
+        persist_data (bool): indicates wether we should store that in the db
     """
     try:
         res = advert.fetch_advert(rid, persist=persist_data, return_as_json=True)
