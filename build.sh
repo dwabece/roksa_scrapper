@@ -7,6 +7,8 @@ then
   exit 1
 fi
 
+pip-sync requirements/requirements-dev.txt
+
 black -S --check .
 pycodestyle .
 find . -iname "*.py" | xargs pylint
