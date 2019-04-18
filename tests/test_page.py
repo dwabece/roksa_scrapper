@@ -38,8 +38,7 @@ def test_get_rox_page(mock_get):
 @mock.patch('requests.get')
 def test_get_rox_page_404(mock_get):
     resp = helpers.mock_response(
-        status=404,
-        raise_for_status=requests.exceptions.HTTPError('bang')
+        status=404, raise_for_status=requests.exceptions.HTTPError('bang')
     )
     mock_get.return_value = resp
 

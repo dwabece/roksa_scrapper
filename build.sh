@@ -7,9 +7,7 @@ then
   exit 1
 fi
 
-pip-sync requirements/requirements-dev.txt
-
 black -S --check .
 pycodestyle .
-find . -iname "*.py" | xargs pylint
-pytest .
+find . -iname "*.py" -not -path "./tests/test_*" | xargs pylint
+PYTHONPATH=. pytest .

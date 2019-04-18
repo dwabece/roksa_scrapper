@@ -21,7 +21,7 @@ def _is_response_really_200(www_body):
     so we need to doublecheck that.
     """
     probe_phrase = 'Such an ad does not exist or was disabled.'
-    return True if probe_phrase not in www_body else False
+    return probe_phrase not in www_body
 
 
 def _execute_rox_request(advert_url):
@@ -34,6 +34,9 @@ def _execute_rox_request(advert_url):
 
 
 def get_rox_page(url):
+    """
+    Fetching rox page by its url.
+    """
     response = _execute_rox_request(url)
     response.raise_for_status()
 

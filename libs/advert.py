@@ -17,7 +17,7 @@ DB = MONGO_CLIENT.get_database(config.MONGO.get('db'))
 ADVERT_COL = DB.get_collection('advert')
 
 
-logger = get_logger(__name__)
+LOGGER = get_logger(__name__)
 
 
 def fetch_advert(roksa_id, persist=False, return_as_json=False):
@@ -92,12 +92,8 @@ def _parse_ad(page_body):
         try:
             result.update(field_fnc(soup))
         except AttributeError as exc:
-            logger.debug(exc)
+            LOGGER.debug(exc)
             raise
-            # TODO logging nand dumping HTML needed here
-            # we're passing that since number is our priority
-            # not consistence
-            # pass
 
     return result
 
@@ -231,6 +227,9 @@ def _parse_commonfields_list(txt_val):
 
 
 def extract_advert_ids_from_search_result_page(page_body):
+    """
+    Extracts adverts from page html
+    """
     body_container = BeautifulSoup(page_body, 'html.parser')
     adverts_container = body_container.find(id='anons_group')
     ads = adverts_container.find('a')
