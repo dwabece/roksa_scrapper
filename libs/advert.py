@@ -232,6 +232,6 @@ def extract_advert_ids_from_search_result_page(page_body):
     """
     body_container = BeautifulSoup(page_body, 'html.parser')
     adverts_container = body_container.find(id='anons_group')
-    ads = adverts_container.find('a')
+    ads = adverts_container.find_all('a')
 
     return [int(a['href'].split('/')[-1]) for a in ads]

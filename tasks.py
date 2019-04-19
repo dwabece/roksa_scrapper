@@ -17,7 +17,7 @@ def put_ids_to_queue(ids_list):
     """
     Pushes list of advert ids to celery queue
     """
-    LOGGER.debug('pushing %s ads to the queue', ids_list)
+    LOGGER.debug('pushing %s ads to the queue', len(ids_list))
     for advert_id in ids_list:
         fetch_single_advert.delay(advert_id)
 
@@ -56,7 +56,6 @@ def iterate_over_search_results(page_num=1):
     put_ids_to_queue(search_result_adverts)
 
     next_page, pages_count = page.get_sresults_pages_info(page_body)
-    print(next_page, pages_count)
     if next_page > pages_count:
         return
 
