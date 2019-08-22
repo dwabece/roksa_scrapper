@@ -1,0 +1,6 @@
+[run]
+omit =
+    */site-packages/*
+    tests/*
+    conftest.py
+    __init__.py

@@ -1,71 +1,68 @@
+from unittest import mock, TestCase
 import pytest
 import requests
 from libs import page
-from unittest import mock
-from tests import helpers
 
 
-def test_get_advert_page_url():
-    expected_url = 'https://www.roksa.pl/en/advertisements/show/1312'
-    assert page._get_advert_url(1312) == expected_url
+class PageTest(TestCase):
+    @staticmethod
+    def _mock_response(
+            status=200,
+            content="CONTENT",
+            json_data=None,
+            headers={},
+            raise_for_status=None):
+        resp = mock.Mock()
+        resp.raise_for_status = mock.Mock()
+        if raise_for_status:
+            resp.raise_for_status.side_effect = raise_for_status
+        resp.status_code = status
+        resp.content = content
+        resp.headers = headers
+        if json_data:
+            resp.json = mock.Mock(
+                return_value=json_data
+            )
+        return resp
 
+    @mock.patch('requests.get')
+    def test_execute_rox_request(self, request_get):
+        url = page._get_advert_url(1337)
+        page._execute_rox_request(url)
 
-@mock.patch('requests.get')
-def test_execute_rox_request(request_get):
-    url = page._get_advert_url(1337)
-    page._execute_rox_request(url)
+        expected_request_params = {
+            'headers': {'Referer': 'https://www.roksa.pl/'},
+            'timeout': 1.5,
+        }
+        expected_url = 'https://www.roksa.pl/en/advertisements/show/1337'
 
-    expected_request_params = {
-        'headers': {'Referer': 'https://www.roksa.pl/'},
-        'timeout': 1.5,
-    }
-    expected_url = 'https://www.roksa.pl/en/advertisements/show/1337'
+        assert expected_url == url
 
-    request_get.assert_called_with(expected_url, **expected_request_params)
+        request_get.assert_called_with(expected_url, **expected_request_params)
 
+    @mock.patch('libs.page.requests.get')
+    def test_get_page_200(self, requests_get):
+        requests_get.return_value = PageTest._mock_response(content=b'hey!')
+        status_code, body = page.get_rox_page('http://url.tld/ad/numb3r')
 
-@mock.patch('requests.get')
-def test_get_rox_page(mock_get):
-    resp = helpers.mock_response(content='hey ho!')
-    mock_get.return_value = resp
+        assert (200, 'hey!') == (status_code, body)
 
-    resp_code, page_body = page.get_rox_page(1337)
+    @mock.patch('libs.page.requests.get')
+    def test_get_advert_page_fake200(self, requests_get):
+        requests_get.return_value = PageTest._mock_response(
+            content=b'Such an ad does not exist or was disabled.'
+        )
 
-    assert resp_code == 200
-    assert page_body == 'hey ho!'
+        with pytest.raises(requests.exceptions.HTTPError):
+            page.get_advert_page(1337)
 
+    # @mock.patch('libs.page.requests.get')
+    # def test_get_rox_page_404(mock_get, requests_get):
+    #     requests_get.return_value = PageTest._mock_response(
+    #         status=404,
+    #         content=b'asd',
+    #         raise_for_status=requests.exceptions.HTTPError()
+    #     )
 
-@mock.patch('requests.get')
-def test_get_rox_page_404(mock_get):
-    resp = helpers.mock_response(
-        status=404, raise_for_status=requests.exceptions.HTTPError('bang')
-    )
-    mock_get.return_value = resp
-
-    with pytest.raises(requests.exceptions.HTTPError):
-        page.get_rox_page(1337)
-
-
-@mock.patch('libs.page.get_rox_page')
-def test_advert_page_200(resp_mock):
-    resp_mock.return_value = [200, 'hello!']
-    code, page_body = page.get_advert_page(1337)
-
-    assert code == 200
-    assert page_body == 'hello!'
-
-
-@mock.patch('libs.page.get_rox_page')
-def test_advert_page_fake_200(resp_mock):
-    resp_mock.return_value = helpers.response_fake_200()
-
-    with pytest.raises(requests.exceptions.HTTPError):
-        page.get_advert_page(1337)
-
-
-def test_get_search_results_last_page():
-    _, page_body = helpers.response_search_results()
-
-    current_page, max_pages = page.get_sresults_pages_info(page_body)
-    assert current_page == 3
-    assert max_pages == 218
+    #     with pytest.raises(requests.exceptions.HTTPError):
+    #         page.get_rox_page('http://that-will-give-404')

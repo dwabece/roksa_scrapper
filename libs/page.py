@@ -40,10 +40,9 @@ def get_rox_page(url):
     response = _execute_rox_request(url)
     response.raise_for_status()
 
-    http_response_code = response.status_code
     page_body = response.content.decode('utf-8')
 
-    return http_response_code, page_body
+    return response.status_code, page_body
 
 
 def get_advert_page(rid):
