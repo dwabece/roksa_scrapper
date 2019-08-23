@@ -5,16 +5,16 @@ from ad's HTML body
 import json
 
 from bs4 import BeautifulSoup
-from pymongo import MongoClient
+# from pymongo import MongoClient
 
 import config
 from libs.page import get_advert_page
 from logmodule import get_logger
 
 # Mongo initialization
-MONGO_CLIENT = MongoClient(config.get_mongo_url())
-DB = MONGO_CLIENT.get_database(config.MONGO.get('db'))
-ADVERT_COL = DB.get_collection('advert')
+# MONGO_CLIENT = MongoClient(config.get_mongo_url())
+# DB = MONGO_CLIENT.get_database(config.MONGO.get('db'))
+# ADVERT_COL = DB.get_collection('advert')
 
 
 LOGGER = get_logger(__name__)
@@ -66,6 +66,9 @@ def fetch_advert(roksa_id, persist=False, return_as_json=False):
 
 #     return res
 
+def _load_page_body(html):
+    return BeautifulSoup(html, 'html.parser')
+
 
 def _parse_ad(page_body):
     """
@@ -77,20 +80,21 @@ def _parse_ad(page_body):
     Returns:
         dict: advert attributes with their values
     """
-    fields_to_parse = (
-        _get_ad_name,
-        _get_ad_id,
-        _get_services,
-        _get_ad_description,
-        _get_commonfields,
-    )
+    soup = _load_page_body(page_body)
 
-    soup = BeautifulSoup(page_body, 'html.parser')
+    fields_to_fetch = {
+        'id': _get_ad_name,
+        # _get_ad_id,
+        # _get_services,
+        # _get_ad_description,
+        # _get_commonfields,
+    }
+
     result = {}
 
-    for field_fnc in fields_to_parse:
+    for field_function in fields_to_fetch:
         try:
-            result.update(field_fnc(soup))
+            result.update(field_function(soup))
         except AttributeError as exc:
             LOGGER.debug(exc)
             raise
@@ -111,7 +115,8 @@ def _get_ad_id(soup_body):
         .find('link', {'rel': 'canonical'}, href=True)
         .get('href', 'Not found')
     )
-    return {'id': value.split('/')[-1]}
+    return value.split('/')[-1]
+    # return {'id': value.split('/')[-1]}
 
 
 def _get_ad_name(soup_body):
@@ -121,13 +126,13 @@ def _get_ad_name(soup_body):
         Returns:
         dict: dict containing `name` key and list of services
     """
-    value = (
+    return (
         soup_body.find('div', attrs={'id': 'anons_header'})
         .find('h2')
         .get_text()
         .strip()
     )
-    return {'name': value}
+    # return {'name': value}
 
 
 def _get_ad_description(soup_body):
