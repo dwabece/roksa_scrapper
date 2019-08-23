@@ -1,7 +1,11 @@
+import pytest
+from unittest import mock, TestCase
 from libs import advert
 
 
-def test_parse_commonfields_list():
-    input_ = 'tea,who, you, yeah,bunny'
-    expected_ = ['tea', 'who', 'you', 'yeah', 'bunny']
-    assert advert._parse_commonfields_list(input_) == expected_
+class TestAdvert(TestCase):
+
+    @pytest.mark.usefixtures('fix_200_w_attrs')
+    @mock.patch('requests.get', return_value='fix_200_w_attrs')
+    def test_1(self, huj):
+        print(huj)

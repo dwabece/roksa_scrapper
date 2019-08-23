@@ -52,12 +52,12 @@ def get_advert_page(rid):
     with no data returning http 200 status.
     """
     advert_url = _get_advert_url(rid)
-    http_response_code, page_body = get_rox_page(advert_url)
+    _, page_body = get_rox_page(advert_url)
 
     if not _is_response_really_200(page_body):
         raise requests.exceptions.HTTPError(f'ad {rid} disabled or deleted')
 
-    return http_response_code, page_body
+    return page_body
 
 
 def get_sresults_page(page_num=None):

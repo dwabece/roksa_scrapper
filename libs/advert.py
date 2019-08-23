@@ -33,12 +33,12 @@ def fetch_advert(roksa_id, persist=False, return_as_json=False):
             depends on `return_as_json` argument
     """
     # @TODO tryexcept that
-    _, www_body = get_advert_page(roksa_id)
+    www_body = get_advert_page(roksa_id)
 
     page_data = _parse_ad(www_body)
 
-    if persist:
-        _persist_advert(page_data)
+    # if persist:
+        # _persist_advert(page_data)
 
     if return_as_json:
         return json.dumps(page_data)
@@ -46,25 +46,25 @@ def fetch_advert(roksa_id, persist=False, return_as_json=False):
     return page_data
 
 
-def _persist_advert(advert_data, check_if_exists=True):
-    """
-    Saves fetched advert data to mongo collection
+# def _persist_advert(advert_data, check_if_exists=True):
+#     """
+#     Saves fetched advert data to mongo collection
 
-    Parameters:
-        advert_data (dict): dict containing set of found ad attributes
-        check_if_exists (bool): verify if such ad already exists
-            before inserting it
+#     Parameters:
+#         advert_data (dict): dict containing set of found ad attributes
+#         check_if_exists (bool): verify if such ad already exists
+#             before inserting it
 
-    Returns:
-        object: pymongo element object
-    """
-    if check_if_exists:
-        existing = ADVERT_COL.find_one({'id': advert_data['id']})
-        if existing:
-            return existing.get('_id')
-    res = ADVERT_COL.insert(advert_data)
+#     Returns:
+#         object: pymongo element object
+#     """
+#     if check_if_exists:
+#         existing = ADVERT_COL.find_one({'id': advert_data['id']})
+#         if existing:
+#             return existing.get('_id')
+#     res = ADVERT_COL.insert(advert_data)
 
-    return res
+#     return res
 
 
 def _parse_ad(page_body):
