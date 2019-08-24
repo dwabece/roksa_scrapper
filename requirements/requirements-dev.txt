@@ -1,8 +1,8 @@
 -r requirements.txt
 
-
+pytest
+pytest-cov
+pytest-flake8
 black
 ipdb
-pep8
-pylint
-watchdog
+flake8
