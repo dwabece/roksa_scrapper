@@ -10,6 +10,7 @@ from bs4 import BeautifulSoup
 import config
 from libs.page import get_advert_page
 from logmodule import get_logger
+from libs import utils
 
 # Mongo initialization
 # MONGO_CLIENT = MongoClient(config.get_mongo_url())
@@ -83,23 +84,27 @@ def _parse_ad(page_body):
     soup = _load_page_body(page_body)
 
     fields_to_fetch = {
-        'id': _get_ad_name,
-        # _get_ad_id,
-        # _get_services,
-        # _get_ad_description,
-        # _get_commonfields,
+        'rid': _get_ad_id,
+        'name': _get_ad_name,
+        'services': _get_services,
+        'description': _get_ad_description,
     }
 
     result = {}
 
-    for field_function in fields_to_fetch:
+    for field, fn in fields_to_fetch.items():
         try:
-            result.update(field_function(soup))
+            result.update({
+                field: fn(soup)
+            })
         except AttributeError as exc:
             LOGGER.debug(exc)
             raise
 
-    return result
+    commonfields = _get_commonfields(soup)
+    result.update(commonfields)
+
+    return utils.Advert(**result)
 
 
 def _get_ad_id(soup_body):
@@ -132,7 +137,6 @@ def _get_ad_name(soup_body):
         .get_text()
         .strip()
     )
-    # return {'name': value}
 
 
 def _get_ad_description(soup_body):
@@ -145,7 +149,8 @@ def _get_ad_description(soup_body):
     desc_container = soup_body.find('div', attrs={'id': 'anons_content'}).find(
         'div', attrs={'id': 'tresc_pl'}
     )
-    return {'description': desc_container.get_text(strip=True)}
+
+    return ' '.join(desc_container.stripped_strings)
 
 
 def _get_services(soup_body):
@@ -158,7 +163,7 @@ def _get_services(soup_body):
     tags_soup = soup_body.find_all('p', attrs={'class': 'tag'})
     tags_list = [tag.get_text(strip=True).lower() for tag in tags_soup]
 
-    return {'tags': tags_list}
+    return tags_list
 
 
 def _get_commonfields(soup_body):
@@ -168,67 +173,69 @@ def _get_commonfields(soup_body):
 
     Returns:
         dict: advert attributes with their values
+
     """
-    result = {}
+    def sanitize_value(value):
+        return value.lower().strip()
 
-    def sanitize_attribute_key(txt_val):
-        return txt_val.lower().split(':')[0]
+    def parse_unitary_value(value):
+        return value.split()[0]
 
-    ad_attributes_list = (
-        soup_body.find('div', attrs={'id': 'anons_details'}).find('ul').find_all('li')
-    )
+    def parse_list_value(value):
+        if value == '-':
+            return []
 
-    desired_fields = (
-        'phone number',
-        'city',
-        'district',
-        'age',
-        'weight',
-        'height',
-        'breast',
-        'languages',
-        '1 hour',
-    )
+        return value.split()
 
-    fields_values_mapping = {
-        'weight': _parse_commonfields_numeric,
-        'height': _parse_commonfields_numeric,
-        'languages': _parse_commonfields_list,
-        '1 hour': _parse_commonfields_numeric,
+    def parse_phone(value):
+        return value.replace(' ', '').replace('+', '').replace('48', '').replace('-', '')
+
+    ad_attributes_list = soup_body.find('div', attrs={'id': 'anons_details'}).find('ul').find_all('li')
+
+    fields_mapping = {
+        'phone_number': parse_phone,
+        'city': None,
+        'district': None,
+        'out_calls': None,
+        'age': None,
+        'weight': parse_unitary_value,
+        'height': parse_unitary_value,
+        'breast': parse_unitary_value,
+        'languages': parse_list_value,
+        '1_hour': parse_unitary_value,
+        '15_min': parse_unitary_value,
+        '30_min': parse_unitary_value,
+        'all_night': parse_unitary_value,
     }
 
+    remap_field_names = {
+        '1_hour': 'price_hour',
+        '15_min': 'price_quarter',
+        '30_min': 'price_half',
+        'all_night': 'price_night',
+    }
+
+    commonfields_ = {}
+
     for item in ad_attributes_list:
-        obj_attr_label = item.find('span')
-        obj_attr_value = obj_attr_label.find_next_sibling()
+        # each `data row` is made out of two spans
+        # fist one contains key, second one value of an attribute
+        kv = item.find_all('span')
 
-        attr_name = sanitize_attribute_key(obj_attr_label.get_text(strip=True))
-
-        if attr_name not in desired_fields or not obj_attr_value:
+        field_name = utils.slugify(kv[0].text)
+        if field_name not in fields_mapping.keys():
             continue
 
-        attr_value = obj_attr_value.get_text(strip=True)
+        value = sanitize_value(kv[1].text)
+        fn = fields_mapping[field_name]
+        if fn:
+            value = fn(value)
 
-        value_map_fn = fields_values_mapping.get(attr_name)
-        if value_map_fn:
-            attr_value = value_map_fn(attr_value)
+        # renaming field name
+        field_name = remap_field_names.get(field_name) or field_name
+        commonfields_[field_name] = value
 
-        result[attr_name] = attr_value
-
-    return result
-
-
-def _parse_commonfields_numeric(txt_val):
-    """
-    Helper function to remove unneccessary unit from numeric fields
-    """
-    return int(txt_val.split()[0])
-
-
-def _parse_commonfields_list(txt_val):
-    """
-    Helper function that splits coma separated elements to list
-    """
-    return list({item.strip() for item in txt_val.split(',') if item})
+    return commonfields_
 
 
 def extract_advert_ids_from_search_result_page(page_body):
