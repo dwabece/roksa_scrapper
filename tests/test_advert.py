@@ -95,6 +95,5 @@ def test_attrs_commonfields(fix_200_w_attrs_soup):
 @pytest.mark.usefixtures('fix_200_w_attrs')
 def test_get_ad(fix_200_w_attrs):
     ad_fields = _make_advert_200_fields()
-    ad_contens = utils.Advert(**ad_fields)
 
-    assert ad_contens == advert._parse_ad(fix_200_w_attrs)
+    assert ad_fields == advert._parse_ad(fix_200_w_attrs)

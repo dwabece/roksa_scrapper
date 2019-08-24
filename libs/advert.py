@@ -104,7 +104,7 @@ def _parse_ad(page_body):
     commonfields = _get_commonfields(soup)
     result.update(commonfields)
 
-    return utils.Advert(**result)
+    return result
 
 
 def _get_ad_id(soup_body):
