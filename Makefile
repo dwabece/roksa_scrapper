@@ -1,2 +1,6 @@
 test:
-	PYTHONPATH=. pytest -s -v --cov
+	PYTHONPATH=. pytest -s -vv --cov --flake8
+
+test-cov:
+	PYTHONPATH=. pytest -s -vv --cov --cov-report=html
+	osascript saf.osa

@@ -7,7 +7,6 @@ import json
 from bs4 import BeautifulSoup
 # from pymongo import MongoClient
 
-import config
 from libs.page import get_advert_page
 from logmodule import get_logger
 from libs import utils
@@ -39,7 +38,7 @@ def fetch_advert(roksa_id, persist=False, return_as_json=False):
     page_data = _parse_ad(www_body)
 
     # if persist:
-        # _persist_advert(page_data)
+    #   _persist_advert(page_data)
 
     if return_as_json:
         return json.dumps(page_data)

@@ -1,6 +1,5 @@
 import pytest
-from unittest import mock
-from libs import advert, utils
+from libs import advert
 
 
 advert_200_desc = (
