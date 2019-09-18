@@ -30,8 +30,24 @@ class PageTest(TestCase):
         url = page._get_advert_url(1337)
         page._execute_rox_request(url)
 
+        default_headers = {
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Accept-Language': 'en-GB,en-US;q=0.9,en;q=0.8',
+            'Connection': 'keep-alive',
+            'Cookie': 'roksapl=ipr25mvvvto0fk2og33cfbn4g5',
+            'Host': 'www.roksa.pl',
+            'Referer': 'https://www.roksa.pl/',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'same-origin',
+            'Sec-Fetch-User': '?1',
+            'Upgrade-Insecure-Requests': '1',
+            'User-Agent': ('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) '
+                           'AppleWebKit/537.36 (KHTML, like Gecko) '
+                           'Chrome/77.0.3865.75 Safari/537.36')
+        }
         expected_request_params = {
-            'headers': {'Referer': 'https://www.roksa.pl/'},
+            'headers': default_headers,
             'timeout': 1.5,
         }
         expected_url = 'https://www.roksa.pl/en/advertisements/show/1337'
