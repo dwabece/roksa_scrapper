@@ -28,7 +28,22 @@ def _execute_rox_request(advert_url):
     """
     Executes parametrized request to portal
     """
-    headers_payload = {'Referer': 'https://www.roksa.pl/'}
+    headers_payload = {
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Accept-Language': 'en-GB,en-US;q=0.9,en;q=0.8',
+        'Connection': 'keep-alive',
+        'Cookie': 'roksapl=ipr25mvvvto0fk2og33cfbn4g5',
+        'Host': 'www.roksa.pl',
+        'Referer': 'https://www.roksa.pl/',
+        'Sec-Fetch-Mode': 'navigate',
+        'Sec-Fetch-Site': 'same-origin',
+        'Sec-Fetch-User': '?1',
+        'Upgrade-Insecure-Requests': '1',
+        'User-Agent': ('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) '
+                       'AppleWebKit/537.36 (KHTML, like Gecko) '
+                       'Chrome/77.0.3865.75 Safari/537.36')
+    }
     request_params = {'headers': headers_payload, 'timeout': 1.5}
     return requests.get(advert_url, **request_params)
 

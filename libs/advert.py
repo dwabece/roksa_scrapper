@@ -87,6 +87,7 @@ def _parse_ad(page_body):
         'name': _get_ad_name,
         'services': _get_services,
         'description': _get_ad_description,
+        'pictures': _extract_pictures,
     }
 
     result = {}
@@ -246,3 +247,8 @@ def extract_advert_ids_from_search_result_page(page_body):
     ads = adverts_container.find_all('a')
 
     return [int(a['href'].split('/')[-1]) for a in ads]
+
+
+def _extract_pictures(page_body):
+    img_links = page_body.select('div.galeria-thumbs a')
+    return [link.attrs.get('href')[2:] for link in img_links]

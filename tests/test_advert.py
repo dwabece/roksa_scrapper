@@ -61,6 +61,15 @@ def _make_advert_200_fields():
     }
     fields.update(ad)
 
+    x = {'pictures': [
+        'foto7.roksa.pl/normal/5404047.jpg',
+        'foto7.roksa.pl/normal/5404049.jpg',
+        'foto7.roksa.pl/normal/5404051.jpg',
+        'foto7.roksa.pl/normal/5404053.jpg',
+        'foto7.roksa.pl/normal/5404055.jpg',
+        'foto7.roksa.pl/normal/5404057.jpg']}
+    fields.update(x)
+
     return fields
 
 
